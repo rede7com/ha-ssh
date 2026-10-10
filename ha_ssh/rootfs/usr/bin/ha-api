@@ -1,0 +1,29 @@
+#!/bin/sh
+set -eu
+
+uso() {
+    echo "uso: ha-api [--core] MÉTODO CAMINHO [CORPO_JSON]" >&2
+    exit 2
+}
+
+BASE=${HA_API_BASE:-http://supervisor}
+if [ "${1:-}" = "--core" ]; then
+    BASE="${BASE}/core"
+    shift
+fi
+[ $# -ge 2 ] || uso
+METODO=$1
+CAMINHO=$2
+CORPO=${3:-}
+
+TOKEN=${SUPERVISOR_TOKEN:-}
+if [ -z "${TOKEN}" ] && [ -r /run/s6/container_environment/SUPERVISOR_TOKEN ]; then
+    TOKEN=$(cat /run/s6/container_environment/SUPERVISOR_TOKEN)
+fi
+[ -n "${TOKEN}" ] || { echo "ha-api: sem SUPERVISOR_TOKEN" >&2; exit 1; }
+
+if [ -n "${CORPO}" ]; then
+    exec curl -sS -X "${METODO}" -H "Authorization: Bearer ${TOKEN}" \
+        -H "Content-Type: application/json" -d "${CORPO}" "${BASE}${CAMINHO}"
+fi
+exec curl -sS -X "${METODO}" -H "Authorization: Bearer ${TOKEN}" "${BASE}${CAMINHO}"
