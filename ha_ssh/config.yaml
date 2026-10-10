@@ -1,5 +1,5 @@
 name: "HA SSH"
-version: "1.0.0"
+version: "1.1.0"
 slug: ha_ssh
 description: "Acesso SSH root por chave ao Home Assistant, com docker e API do Supervisor"
 url: "https://github.com/rede7com/ha-ssh"
@@ -12,6 +12,9 @@ startup: services
 boot: auto
 init: false
 full_access: true
+privileged:
+  - SYS_ADMIN
+  - NET_ADMIN
 apparmor: false
 homeassistant_api: true
 hassio_api: true
